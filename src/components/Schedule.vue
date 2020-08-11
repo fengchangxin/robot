@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="schedule">
 
     <x-header title="slot:overwrite-title" :right-options="{showMore: true}"
               @on-click-more="showToast">
@@ -19,12 +19,25 @@
       <tab-item @on-item-click="onItemClick">日常任务</tab-item>
     </tab>
 
-    <panel :list="scheduleList" @on-click-item="showToast"></panel>
+    <template>
+      <div v-for="item in scheduleList" @click.prevent="showToast" class="schedule-content">
+        <flexbox>
+          <flexbox-item :span="3/4">
+            <flexbox>
+              <flexbox-item :span="3/4"><div class="flex-demo">2fdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd3</div></flexbox-item>
+              <flexbox-item><div class="flex-demo">fasddffffffffffffffffffffffffffffffffffffffffffffffffffffff</div></flexbox-item>
+            </flexbox>
+            <h1 class="flex-demo">33asdddddddddddddddddddddddddddddddddddddddddddddd33</h1>
+          </flexbox-item>
+          <flexbox-item><div class="flex-demo">fdfffffffffffffffffffffffffffffffffffffffffffffffffasdf</div></flexbox-item>
+        </flexbox>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
-  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Panel} from 'vux'
+  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem} from 'vux'
 
   export default {
     name: 'Schedule',
@@ -34,15 +47,21 @@
       ButtonTabItem,
       Tab,
       TabItem,
-      Panel
+      Flexbox,
+      FlexboxItem
     },
     data () {
       return {
         showPositionValue: false,
         scheduleList: [
           {
-            title: '123',
-            desc: 'fdfd',
+            title: '23423',
+            desc: 'ddddddd',
+            completeDate: '2020-12-12'
+          },
+          {
+            title: '444444',
+            desc: '2222222',
             completeDate: '2020-12-12'
           }
         ]
@@ -51,7 +70,7 @@
     methods: {
       showToast () {
         console.log('sfasd')
-      },
+    },
       onItemClick () {
         console.log('fffff')
       }
@@ -59,8 +78,28 @@
   }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '~vux/src/styles/1px.less';
   .schedule-head-date {
     margin-top: 5px;
   }
+  .schedule-title {
+    width: 80%;
+  }
+  .schedule-content {
+    margin-top: 2px;
+    background-color: #fbf9fe;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .schedule {
+    background-color: aliceblue;
+  }
+.flex-demo {
+  text-align: center;
+  color: #fff;
+  background-color: #20b907;
+  background-clip: padding-box;
+}
 </style>
