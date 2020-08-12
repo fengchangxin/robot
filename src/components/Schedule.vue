@@ -28,7 +28,7 @@
                 <div class="flex-demo">2fdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd3</div>
               </flexbox-item>
               <flexbox-item>
-                <div class="flex-demo">完成时间：2020-12-12 12:12:12</div>
+                <div class="completed-date">完成时间：2020-12-12 12:12:12</div>
               </flexbox-item>
             </flexbox>
             <h1 class="flex-demo">33asdddddddddddddddddddddddddddddddddddddddddddddd33</h1>
@@ -103,6 +103,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .completed-date {
+    font-size: 12px;
   }
 
   .schedule {
