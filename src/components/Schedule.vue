@@ -22,14 +22,22 @@
     <template>
       <div v-for="item in scheduleList" @click.prevent="showToast" class="schedule-content">
         <flexbox>
-          <flexbox-item :span="3/4">
+          <flexbox-item>
             <flexbox>
-              <flexbox-item :span="3/4"><div class="flex-demo">2fdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd3</div></flexbox-item>
-              <flexbox-item><div class="flex-demo">fasddffffffffffffffffffffffffffffffffffffffffffffffffffffff</div></flexbox-item>
+              <flexbox-item>
+                <div class="flex-demo">2fdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd3</div>
+              </flexbox-item>
+              <flexbox-item>
+                <div class="flex-demo">完成时间：2020-12-12 12:12:12</div>
+              </flexbox-item>
             </flexbox>
             <h1 class="flex-demo">33asdddddddddddddddddddddddddddddddddddddddddddddd33</h1>
           </flexbox-item>
-          <flexbox-item><div class="flex-demo">fdfffffffffffffffffffffffffffffffffffffffffffffffffasdf</div></flexbox-item>
+          <flexbox-item :span="1/8">
+            <div  class="down-x-icon">
+              <x-icon type="ios-arrow-down" size="30"></x-icon>
+            </div>
+          </flexbox-item>
         </flexbox>
       </div>
     </template>
@@ -70,7 +78,7 @@
     methods: {
       showToast () {
         console.log('sfasd')
-    },
+      },
       onItemClick () {
         console.log('fffff')
       }
@@ -79,27 +87,36 @@
 </script>
 
 <style scoped lang="less">
-@import '~vux/src/styles/1px.less';
+  @import '~vux/src/styles/1px.less';
+
   .schedule-head-date {
     margin-top: 5px;
   }
+
   .schedule-title {
     width: 80%;
   }
+
   .schedule-content {
     margin-top: 2px;
     background-color: #fbf9fe;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
   .schedule {
     background-color: aliceblue;
   }
-.flex-demo {
-  text-align: center;
-  color: #fff;
-  background-color: #20b907;
-  background-clip: padding-box;
-}
+
+  .down-x-icon {
+    text-align: center;
+  }
+
+  .flex-demo {
+    text-align: center;
+    color: #fff;
+    background-color: #20b907;
+    background-clip: padding-box;
+  }
 </style>
