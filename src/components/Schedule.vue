@@ -6,10 +6,7 @@
       <x-icon slot="overwrite-left" type="navicon" size="35" @click="showToast"
               style="fill:#fff;position:relative;top:-8px;left:-3px;"></x-icon>
       <div slot="overwrite-title" class="schedule-head-date">
-        <button-tab>
-          <button-tab-item selected>A</button-tab-item>
-          <button-tab-item>B</button-tab-item>
-        </button-tab>
+        <datetime v-model="date"></datetime>
       </div>
     </x-header>
 
@@ -21,21 +18,27 @@
 
     <template>
       <div v-for="item in scheduleList" @click.prevent="showToast" class="schedule-content">
-        <flexbox>
+        <flexbox :gutter="0">
           <flexbox-item>
-            <flexbox>
+            <flexbox :gutter="0">
               <flexbox-item>
-                <div class="flex-demo">2fdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd3</div>
+                <div class="title">{{item.title}}</div>
               </flexbox-item>
-              <flexbox-item>
-                <div class="completed-date">完成时间：2020-12-12 12:12:12</div>
+              <flexbox-item :span="1/4">
+                <div class="completed-date">{{item.completeDate}}</div>
               </flexbox-item>
             </flexbox>
-            <h1 class="flex-demo">33asdddddddddddddddddddddddddddddddddddddddddddddd33</h1>
+            <div class="detail">{{item.content}}</div>
           </flexbox-item>
-          <flexbox-item :span="1/8">
-            <div  class="down-x-icon">
-              <x-icon type="ios-arrow-down" size="30"></x-icon>
+          <flexbox-item :span="1/10">
+            <div class="schedule-status" :style="{'color':item.isCompleted ? 'green' : 'red'}">
+              <span v-text="item.isCompleted ? '完成' : '进行中'"></span>
+            </div>
+          </flexbox-item>
+
+          <flexbox-item :span="1/10">
+            <div class="x-icon-div">
+              <x-icon type="ios-arrow-down" size="30" class="down-x-icon"></x-icon>
             </div>
           </flexbox-item>
         </flexbox>
@@ -45,7 +48,7 @@
 </template>
 
 <script>
-  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem} from 'vux'
+  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime} from 'vux'
 
   export default {
     name: 'Schedule',
@@ -56,21 +59,27 @@
       Tab,
       TabItem,
       Flexbox,
-      FlexboxItem
+      FlexboxItem,
+      Datetime
     },
     data () {
       return {
         showPositionValue: false,
+        date: '2020-08-12',
         scheduleList: [
           {
             title: '23423',
-            desc: 'ddddddd',
-            completeDate: '2020-12-12'
+            content: 'ddddddd',
+            completeDate: '2020-12-12',
+            isCompleted: false,
+            scheduleType: false
           },
           {
             title: '444444',
-            desc: '2222222',
-            completeDate: '2020-12-12'
+            content: '2222222',
+            completeDate: '12:12:12',
+            isCompleted: true,
+            scheduleType: true
           }
         ]
       }
@@ -91,6 +100,7 @@
 
   .schedule-head-date {
     margin-top: 5px;
+    text-align: center;
   }
 
   .schedule-title {
@@ -106,21 +116,39 @@
   }
 
   .completed-date {
+    text-align: center;
+    font-size: x-small;
+  }
+
+  .title {
+    margin-left: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .detail {
+    margin-left: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
     font-size: 12px;
+    color: gray;
   }
 
   .schedule {
     background-color: aliceblue;
   }
 
-  .down-x-icon {
+  .x-icon-div {
     text-align: center;
   }
 
-  .flex-demo {
+  .schedule-status {
     text-align: center;
-    color: #fff;
-    background-color: #20b907;
-    background-clip: padding-box;
+    font-size: 10px;
+  }
+
+  .down-x-icon {
+    display: block;
+    fill: darkgray;
   }
 </style>
