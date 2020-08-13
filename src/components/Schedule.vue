@@ -2,7 +2,7 @@
   <div class="schedule">
 
     <x-header title="slot:overwrite-title" :right-options="{showMore: true}"
-              @on-click-more="showToast">
+              @on-click-more="showToast" style="background-color:darkgray;">
       <x-icon slot="overwrite-left" type="navicon" size="35" @click="showToast"
               style="fill:#fff;position:relative;top:-8px;left:-3px;"></x-icon>
       <div slot="overwrite-title" class="schedule-head-date">
@@ -17,7 +17,7 @@
     </tab>
 
     <template>
-      <div v-for="item in scheduleList" @click.prevent="showToast" class="schedule-content">
+      <div v-for="item in scheduleList" @click.prevent="showDownMenu" class="schedule-content">
         <flexbox :gutter="0">
           <flexbox-item>
             <flexbox :gutter="0">
@@ -30,25 +30,21 @@
             </flexbox>
             <div class="detail">{{item.content}}</div>
           </flexbox-item>
-          <flexbox-item :span="1/10">
+          <flexbox-item :span="1/9">
             <div class="schedule-status" :style="{'color':item.isCompleted ? 'green' : 'red'}">
               <span v-text="item.isCompleted ? '完成' : '进行中'"></span>
             </div>
           </flexbox-item>
-
-          <flexbox-item :span="1/10">
-            <div class="x-icon-div">
-              <x-icon type="ios-arrow-down" size="30" class="down-x-icon"></x-icon>
-            </div>
-          </flexbox-item>
         </flexbox>
+
+        <actionsheet v-model="detailShow" :menus="detailMenu" theme="android" @on-click-menu="onItemClick"></actionsheet>
       </div>
     </template>
   </div>
 </template>
 
 <script>
-  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime} from 'vux'
+  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet} from 'vux'
 
   export default {
     name: 'Schedule',
@@ -60,12 +56,19 @@
       TabItem,
       Flexbox,
       FlexboxItem,
-      Datetime
+      Datetime,
+      Actionsheet
     },
     data () {
       return {
         showPositionValue: false,
         date: '2020-08-12',
+        detailShow: false,
+        detailMenu: {
+          menu1: '详情',
+          menu2: '完成',
+          menu3: '删除'
+        },
         scheduleList: [
           {
             title: '23423',
@@ -90,6 +93,12 @@
       },
       onItemClick () {
         console.log('fffff')
+      },
+      showDownMenu () {
+        this.detailShow = true
+      },
+      closeDownMenu () {
+        this.detailShow = false
       }
     }
   }
@@ -99,7 +108,8 @@
   @import '~vux/src/styles/1px.less';
 
   .schedule-head-date {
-    margin-top: 5px;
+    height: 40px;
+    line-height: 40px;
     text-align: center;
   }
 
