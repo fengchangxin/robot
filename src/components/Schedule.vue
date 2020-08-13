@@ -2,7 +2,7 @@
   <div class="schedule">
 
     <x-header title="slot:overwrite-title" :right-options="{showMore: true}"
-              @on-click-more="showToast" style="background-color:darkgray;">
+              @on-click-more="showOperationMenu" style="background-color:darkgray;">
       <x-icon slot="overwrite-left" type="navicon" size="35" @click="showToast"
               style="fill:#fff;position:relative;top:-8px;left:-3px;"></x-icon>
       <div slot="overwrite-title" class="schedule-head-date">
@@ -11,13 +11,13 @@
     </x-header>
 
     <tab>
-      <tab-item selected @on-item-click="onItemClick">今日任务</tab-item>
-      <tab-item @on-item-click="onItemClick">长远任务</tab-item>
-      <tab-item @on-item-click="onItemClick">日常任务</tab-item>
+      <tab-item selected @on-item-click="scheduleTypeClick(0)">今日任务</tab-item>
+      <tab-item @on-item-click="scheduleTypeClick(1)">长远任务</tab-item>
+      <tab-item @on-item-click="scheduleTypeClick(2)">日常任务</tab-item>
     </tab>
 
     <template>
-      <div v-for="item in scheduleList" @click.prevent="showDownMenu" class="schedule-content">
+      <div v-for="item in scheduleList" class="schedule-content" @click="showDetailMenu">
         <flexbox :gutter="0">
           <flexbox-item>
             <flexbox :gutter="0">
@@ -36,9 +36,13 @@
             </div>
           </flexbox-item>
         </flexbox>
-
-        <actionsheet v-model="detailShow" :menus="detailMenu" theme="android" @on-click-menu="onItemClick"></actionsheet>
       </div>
+
+      <actionsheet v-model="operationShow" :menus="operationMenu" theme="android"
+                   @on-click-menu="onItemClick">
+      </actionsheet>
+      <actionsheet v-model="detailShow" :menus="detailMenu" theme="android" @on-click-menu="onItemClick">
+      </actionsheet>
     </template>
   </div>
 </template>
@@ -64,25 +68,27 @@
         showPositionValue: false,
         date: '2020-08-12',
         detailShow: false,
+        operationShow: false,
         detailMenu: {
           menu1: '详情',
           menu2: '完成',
           menu3: '删除'
+        },
+        operationMenu: {
+          menu1: '新增'
         },
         scheduleList: [
           {
             title: '23423',
             content: 'ddddddd',
             completeDate: '2020-12-12',
-            isCompleted: false,
-            scheduleType: false
+            isCompleted: false
           },
           {
             title: '444444',
             content: '2222222',
             completeDate: '12:12:12',
-            isCompleted: true,
-            scheduleType: true
+            isCompleted: true
           }
         ]
       }
@@ -94,35 +100,32 @@
       onItemClick () {
         console.log('fffff')
       },
-      showDownMenu () {
+      showDetailMenu () {
         this.detailShow = true
       },
-      closeDownMenu () {
-        this.detailShow = false
+      showOperationMenu () {
+        this.operationShow = true
+      },
+      scheduleTypeClick (scheduleType) {
+        console.log(scheduleType)
       }
+    },
+    mounted () {
+      this.scheduleTypeClick(0)
     }
   }
 </script>
 
 <style scoped lang="less">
-  @import '~vux/src/styles/1px.less';
-
   .schedule-head-date {
     height: 40px;
     line-height: 40px;
     text-align: center;
   }
 
-  .schedule-title {
-    width: 80%;
-  }
-
   .schedule-content {
     margin-top: 2px;
-    background-color: #fbf9fe;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background-color: white;
   }
 
   .completed-date {
@@ -148,17 +151,8 @@
     background-color: aliceblue;
   }
 
-  .x-icon-div {
-    text-align: center;
-  }
-
   .schedule-status {
     text-align: center;
     font-size: 10px;
-  }
-
-  .down-x-icon {
-    display: block;
-    fill: darkgray;
   }
 </style>
