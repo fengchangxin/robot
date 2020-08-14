@@ -1,14 +1,17 @@
 <template>
   <div class="schedule">
+    <flexbox :gutter="0" class="schedule-head-date">
+      <flexbox-item :span="1/10">
+        <x-icon type="ios-ionic-outline" size="30"></x-icon>
+      </flexbox-item>
+      <flexbox-item>
+        <x-button @click="showDatePlugin">{{date}}</x-button>
+      </flexbox-item>
 
-    <x-header title="slot:overwrite-title" :right-options="{showMore: true}"
-              @on-click-more="showOperationMenu" style="background-color:darkgray;">
-      <x-icon slot="overwrite-left" type="navicon" size="35" @click="showToast"
-              style="fill:#fff;position:relative;top:-8px;left:-3px;"></x-icon>
-      <div slot="overwrite-title" class="schedule-head-date">
-        <datetime v-model="date"></datetime>
-      </div>
-    </x-header>
+      <flexbox-item :span="1/10">
+        <x-icon type="ios-arrow-back" size="30" @click="showOperationMenu"></x-icon>
+      </flexbox-item>
+    </flexbox>
 
     <tab>
       <tab-item selected @on-item-click="scheduleTypeClick(0)">今日任务</tab-item>
@@ -17,7 +20,7 @@
     </tab>
 
     <template>
-      <div v-for="item in scheduleList" class="schedule-content" @click="showDetailMenu">
+      <div v-for="item in scheduleList" class="schedule-content" @click="showDetailMenu(item.scheduleId)">
         <flexbox :gutter="0">
           <flexbox-item>
             <flexbox :gutter="0">
@@ -39,16 +42,29 @@
       </div>
 
       <actionsheet v-model="operationShow" :menus="operationMenu" theme="android"
-                   @on-click-menu="onItemClick">
+                   @on-click-menu="operationItemClick">
       </actionsheet>
-      <actionsheet v-model="detailShow" :menus="detailMenu" theme="android" @on-click-menu="onItemClick">
+      <actionsheet v-model="detailShow" :menus="detailMenu" theme="android"
+                   @on-click-menu="detailItemClick">
       </actionsheet>
     </template>
   </div>
 </template>
 
 <script>
-  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet} from 'vux'
+  import {
+    XHeader,
+    ButtonTab,
+    ButtonTabItem,
+    Tab,
+    TabItem,
+    Flexbox,
+    FlexboxItem,
+    Datetime,
+    Actionsheet,
+    Group,
+    XButton
+  } from 'vux'
 
   export default {
     name: 'Schedule',
@@ -61,7 +77,9 @@
       Flexbox,
       FlexboxItem,
       Datetime,
-      Actionsheet
+      Actionsheet,
+      Group,
+      XButton
     },
     data () {
       return {
@@ -70,45 +88,86 @@
         detailShow: false,
         operationShow: false,
         detailMenu: {
-          menu1: '详情',
-          menu2: '完成',
-          menu3: '删除'
+          detail: '详情',
+          completed: '完成',
+          deleted: '删除'
         },
         operationMenu: {
-          menu1: '新增'
+          add: '新增'
         },
         scheduleList: [
           {
+            scheduleId: 1,
             title: '23423',
             content: 'ddddddd',
             completeDate: '2020-12-12',
-            isCompleted: false
+            isCompleted: false,
+            scheduleTypeName: '每日任务',
+            bigScheduleTitle: 'dddddddddd'
           },
           {
+            scheduleId: 2,
             title: '444444',
             content: '2222222',
             completeDate: '12:12:12',
-            isCompleted: true
+            isCompleted: true,
+            scheduleTypeName: '日常任务',
+            bigScheduleTitle: 'ffffffffffff'
           }
-        ]
+        ],
+        scheduleId: 0
       }
     },
     methods: {
       showToast () {
         console.log('sfasd')
       },
-      onItemClick () {
-        console.log('fffff')
-      },
-      showDetailMenu () {
+      showDetailMenu (id) {
         this.detailShow = true
+        this.scheduleId = id
       },
       showOperationMenu () {
         this.operationShow = true
       },
       scheduleTypeClick (scheduleType) {
         console.log(scheduleType)
-      }
+      },
+      operationItemClick (key, item) {
+        if (this.operationMenu.add === item) {
+          this.$router.push('/addSchedule')
+        }
+      },
+      detailItemClick (key, item) {
+        console.log(item)
+        switch (item) {
+          case this.detailMenu.detail:
+            this.$router.push({
+              path: '/scheduleDetail',
+              query: {
+                scheduleId: this.scheduleId
+              }
+            })
+            break
+        }
+      },
+      showDatePlugin () {
+        this.$vux.datetime.show({
+          cancelText: '取消',
+          confirmText: '确定',
+          format: 'YYYY-MM-DD HH',
+          value: '2017-05-20 18',
+          onConfirm (val) {
+            console.log('plugin confirm', val)
+            this.date = val
+          },
+          onShow () {
+            console.log('plugin show')
+          },
+          onHide () {
+            console.log('plugin hide')
+          }
+        })
+      },
     },
     mounted () {
       this.scheduleTypeClick(0)
@@ -118,8 +177,7 @@
 
 <style scoped lang="less">
   .schedule-head-date {
-    height: 40px;
-    line-height: 40px;
+    height: 100px;
     text-align: center;
   }
 
