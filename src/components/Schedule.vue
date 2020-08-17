@@ -2,14 +2,14 @@
   <div class="schedule">
     <flexbox :gutter="0" class="schedule-head-date">
       <flexbox-item :span="1/10">
-        <x-icon type="ios-ionic-outline" size="30"></x-icon>
+        <x-icon type="android-menu" size="30" @click="showHome" class="head-x-icon"></x-icon>
       </flexbox-item>
       <flexbox-item>
-        <x-button @click="showDatePlugin">{{date}}</x-button>
+        <x-button plain @click.native="showDatePlugin" style="border: none">{{date}}</x-button>
       </flexbox-item>
 
       <flexbox-item :span="1/10">
-        <x-icon type="ios-arrow-back" size="30" @click="showOperationMenu"></x-icon>
+        <x-icon type="android-more-vertical" size="30" @click="showOperationMenu" class="head-x-icon"></x-icon>
       </flexbox-item>
     </flexbox>
 
@@ -18,6 +18,17 @@
       <tab-item @on-item-click="scheduleTypeClick(1)">长远任务</tab-item>
       <tab-item @on-item-click="scheduleTypeClick(2)">日常任务</tab-item>
     </tab>
+
+    <popup v-model="homeShow" position="left">
+      <div style="width:200px;">
+        <HomeMenu/>
+      </div>
+    </popup>
+
+
+    <actionsheet v-model="operationShow" :menus="operationMenu" theme="android"
+                 @on-click-menu="operationItemClick">
+    </actionsheet>
 
     <template>
       <div v-for="item in scheduleList" class="schedule-content" @click="showDetailMenu(item.scheduleId)">
@@ -41,9 +52,6 @@
         </flexbox>
       </div>
 
-      <actionsheet v-model="operationShow" :menus="operationMenu" theme="android"
-                   @on-click-menu="operationItemClick">
-      </actionsheet>
       <actionsheet v-model="detailShow" :menus="detailMenu" theme="android"
                    @on-click-menu="detailItemClick">
       </actionsheet>
@@ -52,19 +60,8 @@
 </template>
 
 <script>
-  import {
-    XHeader,
-    ButtonTab,
-    ButtonTabItem,
-    Tab,
-    TabItem,
-    Flexbox,
-    FlexboxItem,
-    Datetime,
-    Actionsheet,
-    Group,
-    XButton
-  } from 'vux'
+  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group, XButton, Popup} from 'vux'
+  import HomeMenu from '@/components/HomeMenu'
 
   export default {
     name: 'Schedule',
@@ -79,7 +76,9 @@
       Datetime,
       Actionsheet,
       Group,
-      XButton
+      XButton,
+      Popup,
+      HomeMenu
     },
     data () {
       return {
@@ -87,6 +86,7 @@
         date: '2020-08-12',
         detailShow: false,
         operationShow: false,
+        homeShow: false,
         detailMenu: {
           detail: '详情',
           completed: '完成',
@@ -129,6 +129,9 @@
       showOperationMenu () {
         this.operationShow = true
       },
+      showHome () {
+        this.homeShow = true
+      },
       scheduleTypeClick (scheduleType) {
         console.log(scheduleType)
       },
@@ -150,15 +153,15 @@
             break
         }
       },
+
       showDatePlugin () {
         this.$vux.datetime.show({
           cancelText: '取消',
           confirmText: '确定',
-          format: 'YYYY-MM-DD HH',
-          value: '2017-05-20 18',
+          format: 'YYYY-MM-DD',
+          value: '2017-05-20',
           onConfirm (val) {
             console.log('plugin confirm', val)
-            this.date = val
           },
           onShow () {
             console.log('plugin show')
@@ -167,7 +170,7 @@
             console.log('plugin hide')
           }
         })
-      },
+      }
     },
     mounted () {
       this.scheduleTypeClick(0)
@@ -177,13 +180,13 @@
 
 <style scoped lang="less">
   .schedule-head-date {
-    height: 100px;
     text-align: center;
   }
 
   .schedule-content {
     margin-top: 2px;
     background-color: white;
+    box-shadow: 2px 2px 5px #bbb;
   }
 
   .completed-date {
@@ -212,5 +215,11 @@
   .schedule-status {
     text-align: center;
     font-size: 10px;
+  }
+
+  .head-x-icon {
+    margin: auto;
+    display: block;
+    fill: gray;
   }
 </style>

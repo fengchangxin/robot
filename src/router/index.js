@@ -3,8 +3,10 @@ import Router from 'vue-router'
 import Schedule from '@/components/Schedule'
 import ScheduleAdd from '@/components/ScheduleAdd'
 import ScheduleDetail from '@/components/ScheduleDetail'
+import { DatetimePlugin } from 'vux'
 
 Vue.use(Router)
+Vue.use(DatetimePlugin)
 
 export default new Router({
   routes: [
