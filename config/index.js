@@ -11,8 +11,8 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/cmsWeb': {
-        target: 'http://localhost:20002',
+      '/robotWeb': {
+        target: 'http://localhost:20004',
         changeOrigin: true
       }
     },

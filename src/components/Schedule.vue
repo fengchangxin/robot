@@ -39,7 +39,7 @@
                 <div class="title">{{item.title}}</div>
               </flexbox-item>
               <flexbox-item :span="1/4">
-                <div class="completed-date">{{item.completeDate}}</div>
+                <div class="completed-date">{{item.completionDate}}</div>
               </flexbox-item>
             </flexbox>
             <div class="detail">{{item.content}}</div>
@@ -56,12 +56,18 @@
                    @on-click-menu="detailItemClick">
       </actionsheet>
     </template>
+
+    <toast v-model="errorShow" type="warn" :time="800" is-show-mask :text="errorText" position="top"></toast>
   </div>
 </template>
 
 <script>
-  import {XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group, XButton, Popup} from 'vux'
+  import {
+    XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group, XButton,
+    Popup, Toast
+  } from 'vux'
   import HomeMenu from '@/components/HomeMenu'
+  import {post} from '../utils/api'
 
   export default {
     name: 'Schedule',
@@ -78,15 +84,17 @@
       Group,
       XButton,
       Popup,
-      HomeMenu
+      HomeMenu,
+      Toast
     },
     data () {
       return {
-        showPositionValue: false,
         date: '2020-08-12',
         detailShow: false,
         operationShow: false,
         homeShow: false,
+        errorShow: false,
+        errorText: '',
         detailMenu: {
           detail: '详情',
           completed: '完成',
@@ -95,33 +103,11 @@
         operationMenu: {
           add: '新增'
         },
-        scheduleList: [
-          {
-            scheduleId: 1,
-            title: '23423',
-            content: 'ddddddd',
-            completeDate: '2020-12-12',
-            isCompleted: false,
-            scheduleTypeName: '每日任务',
-            bigScheduleTitle: 'dddddddddd'
-          },
-          {
-            scheduleId: 2,
-            title: '444444',
-            content: '2222222',
-            completeDate: '12:12:12',
-            isCompleted: true,
-            scheduleTypeName: '日常任务',
-            bigScheduleTitle: 'ffffffffffff'
-          }
-        ],
+        scheduleList: [],
         scheduleId: 0
       }
     },
     methods: {
-      showToast () {
-        console.log('sfasd')
-      },
       showDetailMenu (id) {
         this.detailShow = true
         this.scheduleId = id
@@ -133,7 +119,22 @@
         this.homeShow = true
       },
       scheduleTypeClick (scheduleType) {
-        console.log(scheduleType)
+        post('/robotWeb/schedule/list', {
+          pageIndex: 1,
+          pageSize: 1000,
+          scheduleType: scheduleType
+        }).then(resp => {
+          if (resp.status == 200 && resp.data.code == 0) {
+            console.log(resp.data.data)
+            this.scheduleList = resp.data.data.list
+          }
+        }, resp => {
+          this.errorShow = true
+          this.errorText = resp.data.msg
+        }).catch(resp => {
+          this.errorShow = true
+          this.errorText = '网络连接异常'
+        })
       },
       operationItemClick (key, item) {
         if (this.operationMenu.add === item) {
@@ -151,6 +152,9 @@
               }
             })
             break
+          case this.completed:
+            break
+          case this.deleted:
         }
       },
 

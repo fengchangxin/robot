@@ -19,6 +19,15 @@ export const postRequest = (url, params) => {
     }
   })
 }
+
+export const post = (url, params) => {
+  return axios({
+    method: 'post',
+    url: `${base}${url}`,
+    data: params,
+  })
+}
+
 export const uploadFileRequest = (url, params) => {
   return axios({
     method: 'post',
