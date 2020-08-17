@@ -1,23 +1,35 @@
 <template>
     <group>
-      <x-button>我的</x-button>
+      <cell title="我的" is-link></cell>
+      <cell title="消息" is-link>
+        <div>
+          <badge :text="msgNum"></badge>
+        </div>
+      </cell>
     </group>
 </template>
 
 <script>
-  import {Group, XButton} from 'vux'
+  import {Group, Badge, Cell} from 'vux'
   export default {
     name: 'HomeMenu',
     components: {
       Group,
-      XButton
+      Badge,
+      Cell
     },
     data () {
       return {
-        value: ''
+        value: '',
+        msgNum: 0
       }
     },
     methods: {
+      getMsgNum () {
+        this.msgNum = 0
+      }
+    },
+    mounted () {
     }
   }
 </script>

@@ -20,7 +20,7 @@
     </tab>
 
     <popup v-model="homeShow" position="left">
-      <div style="width:200px;">
+      <div style="width:150px;">
         <HomeMenu/>
       </div>
     </popup>
