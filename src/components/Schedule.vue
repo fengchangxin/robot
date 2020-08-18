@@ -235,6 +235,7 @@
           value: dateFormat(new Date(), 'YYYY-MM-DD'),
           onConfirm (val) {
             _this.completionDate = val
+            _this.getScheduleList(0)
           },
           onShow () {
           },
