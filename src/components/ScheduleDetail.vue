@@ -8,32 +8,41 @@
       <p>关联任务：<span class="detail-span">{{schedule.bigScheduleTitle}}</span></p>
       <p>任务详情：<span class="detail-span">{{schedule.content}}</span></p>
     </div>
+    <toast v-model="toast.errorShow" :type="toast.type" :time="1000" is-show-mask :text="toast.errorText" position="top"></toast>
   </div>
 </template>
 
 <script>
-  import {XHeader} from 'vux'
+  import {XHeader, Toast} from 'vux'
   import {getRequest} from '../utils/api'
+  import {API_PATH} from '../constants/Constant'
 
   export default {
     name: 'ScheduleDetail',
     components: {
-      XHeader
+      XHeader,
+      Toast
     },
     data () {
       return {
-        schedule: {}
+        schedule: {},
+        toast: {
+          errorShow: false,
+          errorText: '',
+          type: 'warn'
+        }
       }
     },
     mounted () {
-      console.log(this.$route.query.scheduleId)
-      getRequest('/robotWeb/schedule/get?scheduleId=' + this.$route.query.scheduleId).then(resp => {
-        if (resp.status == 200 && resp.data.code == 0) {
-          console.log(resp.data)
+      getRequest(API_PATH.scheduleDetail + '?scheduleId=' + this.$route.query.scheduleId).then(resp => {
+        if (resp.status === 200 && resp.data.code === 0) {
           this.schedule = resp.data.data
+        } else {
+          this.toast.errorShow = true
+          this.toast.errorText = resp.data.msg
+          this.toast.type = 'warn'
         }
       })
-      this.schedule.scheduleId = this.$route.query.scheduleId
     }
   }
 </script>

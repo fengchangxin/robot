@@ -5,7 +5,7 @@
         <x-icon type="android-menu" size="30" @click="showHome" class="head-x-icon"></x-icon>
       </flexbox-item>
       <flexbox-item>
-        <x-button plain @click.native="showDatePlugin" style="border: none">{{date}}</x-button>
+        <x-button plain @click.native="showDatePlugin" style="border: none">{{completionDate}}</x-button>
       </flexbox-item>
 
       <flexbox-item :span="1/10">
@@ -14,9 +14,9 @@
     </flexbox>
 
     <tab>
-      <tab-item selected @on-item-click="scheduleTypeClick(0)">今日任务</tab-item>
-      <tab-item @on-item-click="scheduleTypeClick(1)">长远任务</tab-item>
-      <tab-item @on-item-click="scheduleTypeClick(2)">日常任务</tab-item>
+      <tab-item selected @on-item-click="getScheduleList(0)">今日任务</tab-item>
+      <tab-item @on-item-click="getScheduleList(1)">长远任务</tab-item>
+      <tab-item @on-item-click="getScheduleList(2)">日常任务</tab-item>
     </tab>
 
     <popup v-model="homeShow" position="left">
@@ -57,20 +57,24 @@
       </actionsheet>
     </template>
 
-    <toast v-model="errorShow" type="warn" :time="800" is-show-mask :text="errorText" position="top"></toast>
+    <toast v-model="toast.errorShow" :type="toast.type" :time="800" is-show-mask :text="toast.errorText" position="top"></toast>
   </div>
 </template>
 
 <script>
   import {
     XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group, XButton,
-    Popup, Toast
+    Popup, Toast, Confirm, ConfirmPlugin, dateFormat
   } from 'vux'
+  import Vue from 'vue'
   import HomeMenu from '@/components/HomeMenu'
   import {post} from '../utils/api'
+  import {API_PATH, PAGE_SIZE} from '../constants/Constant'
 
+  Vue.use(ConfirmPlugin)
   export default {
     name: 'Schedule',
+    inject: ['reload'],
     components: {
       XHeader,
       ButtonTab,
@@ -85,19 +89,24 @@
       XButton,
       Popup,
       HomeMenu,
-      Toast
+      Toast,
+      Confirm
     },
     data () {
       return {
-        date: '2020-08-12',
+        completionDate: dateFormat(new Date(), 'YYYY-MM-DD'),
         detailShow: false,
         operationShow: false,
         homeShow: false,
-        errorShow: false,
-        errorText: '',
+        toast: {
+          errorShow: false,
+          errorText: '',
+          type: 'warn'
+        },
         detailMenu: {
           detail: '详情',
           completed: '完成',
+          update: '修改',
           deleted: '删除'
         },
         operationMenu: {
@@ -118,22 +127,24 @@
       showHome () {
         this.homeShow = true
       },
-      scheduleTypeClick (scheduleType) {
-        post('/robotWeb/schedule/list', {
+      getScheduleList (scheduleType) {
+        post(API_PATH.scheduleList, {
           pageIndex: 1,
-          pageSize: 1000,
-          scheduleType: scheduleType
+          pageSize: PAGE_SIZE,
+          scheduleType: scheduleType,
+          completionDate: this.completionDate
         }).then(resp => {
-          if (resp.status == 200 && resp.data.code == 0) {
-            console.log(resp.data.data)
+          if (resp.status === 200 && resp.data.code === 0) {
             this.scheduleList = resp.data.data.list
+          } else {
+            this.toast.errorShow = true
+            this.toast.errorText = resp.data.msg
+            this.toast.type = 'warn'
           }
-        }, resp => {
-          this.errorShow = true
-          this.errorText = resp.data.msg
         }).catch(resp => {
-          this.errorShow = true
-          this.errorText = '网络连接异常'
+          this.toast.errorShow = true
+          this.toast.errorText = '网络连接异常'
+          this.toast.type = 'warn'
         })
       },
       operationItemClick (key, item) {
@@ -152,32 +163,88 @@
               }
             })
             break
-          case this.completed:
+          case this.detailMenu.completed:
+            this.showConfirmPlugin('完成操作提示', '', 0)
             break
-          case this.deleted:
+          case this.detailMenu.update:
+            this.$router.push({
+              path: '/addSchedule',
+              query: {
+                scheduleId: this.scheduleId
+              }
+            })
+            break
+          case this.detailMenu.deleted:
+            this.showConfirmPlugin('删除操作提示', '', 1)
+            break
         }
       },
-
+      showConfirmPlugin (title, content, type) {
+        const _this = this
+        this.$vux.confirm.show({
+          title: title,
+          content: content,
+          onShow () {
+          },
+          onHide () {
+          },
+          onCancel () {
+          },
+          onConfirm () {
+            switch (type) {
+              // 完成任务
+              case 0:
+                post(API_PATH.scheduleComplete + '?scheduleId=' + _this.scheduleId).then(resp => {
+                  if (resp.status === 200 && resp.data.code === 0) {
+                    _this.toast.errorShow = true
+                    _this.toast.errorText = '操作成功'
+                    _this.toast.type = 'success'
+                    _this.reload()
+                  } else {
+                    _this.toast.errorShow = true
+                    _this.toast.errorText = resp.data.msg
+                    _this.toast.type = 'warn'
+                  }
+                })
+                break
+              // 删除任务
+              case 1:
+                post(API_PATH.scheduleDelete + '?scheduleId=' + _this.scheduleId).then(resp => {
+                  if (resp.status === 200 && resp.data.code === 0) {
+                    _this.toast.errorShow = true
+                    _this.toast.errorText = '操作成功'
+                    _this.toast.type = 'success'
+                    _this.reload()
+                  } else {
+                    _this.toast.errorShow = true
+                    _this.toast.errorText = resp.data.msg
+                    _this.toast.type = 'warn'
+                  }
+                })
+                break
+            }
+          }
+        })
+      },
       showDatePlugin () {
+        const _this = this
         this.$vux.datetime.show({
           cancelText: '取消',
           confirmText: '确定',
           format: 'YYYY-MM-DD',
-          value: '2017-05-20',
+          value: dateFormat(new Date(), 'YYYY-MM-DD'),
           onConfirm (val) {
-            console.log('plugin confirm', val)
+            _this.completionDate = val
           },
           onShow () {
-            console.log('plugin show')
           },
           onHide () {
-            console.log('plugin hide')
           }
         })
       }
     },
     mounted () {
-      this.scheduleTypeClick(0)
+      this.getScheduleList(0)
     }
   }
 </script>
