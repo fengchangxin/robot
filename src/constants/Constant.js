@@ -5,5 +5,6 @@ export const API_PATH = {
   scheduleSave: '/robotWeb/schedule/save',
   scheduleComplete: '/robotWeb/schedule/completed',
   scheduleDelete: '/robotWeb/schedule/delete',
-  scheduleUpdate: '/robotWeb/schedule/update'
+  scheduleUpdate: '/robotWeb/schedule/update',
+  warningCount: '/robotWeb/warning/count'
 }
