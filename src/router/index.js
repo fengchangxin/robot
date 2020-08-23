@@ -4,6 +4,7 @@ import Schedule from '@/components/Schedule'
 import ScheduleAdd from '@/components/ScheduleAdd'
 import ScheduleDetail from '@/components/ScheduleDetail'
 import Attention from '@/components/Attention'
+import Warning from '@/components/Warning'
 import { DatetimePlugin } from 'vux'
 
 Vue.use(Router)
@@ -30,6 +31,11 @@ export default new Router({
       path: '/attention',
       name: 'Attention',
       component: Attention
+    },
+    {
+      path: '/warning',
+      name: 'Warning',
+      component: Warning
     }
   ]
 })

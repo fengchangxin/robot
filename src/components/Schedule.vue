@@ -1,23 +1,27 @@
 <template>
-  <div class="schedule">
-    <flexbox :gutter="0" class="schedule-head-date">
-      <flexbox-item :span="1/10">
-        <x-icon type="android-menu" size="30" @click="showHome" class="head-x-icon"></x-icon>
-      </flexbox-item>
-      <flexbox-item>
-        <x-button plain @click.native="showDatePlugin" style="border: none">{{completionDate}}</x-button>
-      </flexbox-item>
+  <div>
+    <div>
+      <flexbox :gutter="0" class="schedule-head-date">
+        <flexbox-item :span="1/10">
+          <x-icon type="android-menu" size="30" @click="showHome" class="head-x-icon"></x-icon>
+        </flexbox-item>
+        <flexbox-item>
+          <x-button plain @click.native="showDatePlugin" style="border: none">
+            <span style="color: #fbf9fe">{{completionDate}}</span>
+          </x-button>
+        </flexbox-item>
 
-      <flexbox-item :span="1/10">
-        <x-icon type="android-more-vertical" size="30" @click="showOperationMenu" class="head-x-icon"></x-icon>
-      </flexbox-item>
-    </flexbox>
+        <flexbox-item :span="1/10">
+          <x-icon type="android-more-vertical" size="30" @click="showOperationMenu" class="head-x-icon"></x-icon>
+        </flexbox-item>
+      </flexbox>
 
-    <tab>
-      <tab-item selected @on-item-click="getScheduleList(0)">今日任务</tab-item>
-      <tab-item @on-item-click="getScheduleList(1)">长远任务</tab-item>
-      <tab-item @on-item-click="getScheduleList(2)">日常任务</tab-item>
-    </tab>
+      <tab>
+        <tab-item selected @on-item-click="tabItemClick(0)">今日任务</tab-item>
+        <tab-item @on-item-click="tabItemClick(1)">长远任务</tab-item>
+        <tab-item @on-item-click="tabItemClick(2)">日常任务</tab-item>
+      </tab>
+    </div>
 
     <popup v-model="homeShow" position="left">
       <div style="width:150px;">
@@ -25,49 +29,34 @@
       </div>
     </popup>
 
-
     <actionsheet v-model="operationShow" :menus="operationMenu" theme="android"
                  @on-click-menu="operationItemClick">
     </actionsheet>
 
     <template>
-      <div v-for="item in scheduleList" class="schedule-content" @click="showDetailMenu(item.scheduleId)">
-        <flexbox :gutter="0">
-          <flexbox-item>
-            <flexbox :gutter="0">
-              <flexbox-item>
-                <div class="title">{{item.title}}</div>
-              </flexbox-item>
-              <flexbox-item :span="1/4">
-                <div class="completed-date">{{item.completionDate}}</div>
-              </flexbox-item>
-            </flexbox>
-            <div class="detail">{{item.content}}</div>
-          </flexbox-item>
-          <flexbox-item :span="1/9">
-            <div class="schedule-status" :style="{'color':item.isCompleted ? 'green' : 'red'}">
-              <span v-text="item.isCompleted ? '完成' : '进行中'"></span>
-            </div>
-          </flexbox-item>
-        </flexbox>
-      </div>
-
+      <scroller lock-x @on-scroll-bottom="onScrollBottom" ref="scrollerBottom">
+        <div>
+          <ContentList :list="scheduleList" @on-click-item="showDetailMenu"></ContentList>
+        </div>
+      </scroller>
       <actionsheet v-model="detailShow" :menus="detailMenu" theme="android"
                    @on-click-menu="detailItemClick">
       </actionsheet>
     </template>
 
-    <toast v-model="toast.errorShow" :type="toast.type" :time="800" is-show-mask :text="toast.errorText" position="top"></toast>
+    <toast v-model="toast.errorShow" :type="toast.type" :time="800" is-show-mask :text="toast.errorText"
+           position="top"></toast>
   </div>
 </template>
 
 <script>
   import {
     XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group, XButton,
-    Popup, Toast, Confirm, ConfirmPlugin, dateFormat
+    Popup, Toast, Confirm, ConfirmPlugin, dateFormat, Scroller
   } from 'vux'
   import Vue from 'vue'
   import HomeMenu from '@/components/HomeMenu'
+  import ContentList from '@/components/ContentList'
   import {post} from '../utils/api'
   import {API_PATH, PAGE_SIZE} from '../constants/Constant'
 
@@ -76,21 +65,8 @@
     name: 'Schedule',
     inject: ['reload'],
     components: {
-      XHeader,
-      ButtonTab,
-      ButtonTabItem,
-      Tab,
-      TabItem,
-      Flexbox,
-      FlexboxItem,
-      Datetime,
-      Actionsheet,
-      Group,
-      XButton,
-      Popup,
-      HomeMenu,
-      Toast,
-      Confirm
+      XHeader, ButtonTab, ButtonTabItem, Tab, TabItem, Flexbox, FlexboxItem, Datetime, Actionsheet, Group,
+      XButton, Popup, HomeMenu, Toast, Confirm, ContentList, Scroller
     },
     data () {
       return {
@@ -98,6 +74,7 @@
         detailShow: false,
         operationShow: false,
         homeShow: false,
+        onFetching: false,
         toast: {
           errorShow: false,
           errorText: '',
@@ -113,13 +90,15 @@
           add: '新增'
         },
         scheduleList: [],
-        scheduleId: 0
+        scheduleId: 0,
+        pageIndex: 1,
+        scheduleType: 0
       }
     },
     methods: {
-      showDetailMenu (id) {
+      showDetailMenu (item) {
         this.detailShow = true
-        this.scheduleId = id
+        this.scheduleId = item.scheduleId
       },
       showOperationMenu () {
         this.operationShow = true
@@ -127,25 +106,65 @@
       showHome () {
         this.homeShow = true
       },
-      getScheduleList (scheduleType) {
+      tabItemClick (scheduleType) {
+        this.scheduleList = []
+        this.pageIndex = 1
+        this.getScheduleList(this.pageIndex, scheduleType)
+      },
+      getScheduleList (pageIndex, scheduleType) {
         post(API_PATH.scheduleList, {
-          pageIndex: 1,
+          pageIndex: pageIndex,
           pageSize: PAGE_SIZE,
           scheduleType: scheduleType,
           completionDate: this.completionDate
         }).then(resp => {
           if (resp.status === 200 && resp.data.code === 0) {
-            this.scheduleList = resp.data.data.list
+            let list = resp.data.data.list
+            if (list.length > 0) {
+              let status = ''
+              for (let i = 0; i < list.length; i++) {
+                if (list[i].isCompleted) {
+                  status = '<span style="color: #1AAD19">已完成</span>'
+                } else {
+                  status = '<span style="color: red">进行中</span>'
+                }
+                this.scheduleList.push({
+                  title: list[i].title,
+                  content: list[i].content,
+                  date: list[i].completionDate,
+                  status: status,
+                  scheduleId: list[i].scheduleId
+                })
+              }
+            } else {
+              if (this.pageIndex > 1) {
+                this.pageIndex -= 1
+              }
+              this.toast.errorShow = true
+              this.toast.errorText = '没有数据了'
+              this.toast.type = 'text'
+            }
           } else {
             this.toast.errorShow = true
             this.toast.errorText = resp.data.msg
             this.toast.type = 'warn'
           }
-        }).catch(resp => {
-          this.toast.errorShow = true
-          this.toast.errorText = '网络连接异常'
-          this.toast.type = 'warn'
         })
+      },
+      onScrollBottom () {
+        if (this.onFetching) {
+          // do nothing
+        } else {
+          this.onFetching = true
+          setTimeout(() => {
+            this.pageIndex += 1
+            this.getScheduleList(this.pageIndex, this.scheduleType)
+            this.$nextTick(() => {
+              this.$refs.scrollerBottom.reset()
+            })
+            this.onFetching = false
+          }, 2000)
+        }
       },
       operationItemClick (key, item) {
         if (this.operationMenu.add === item) {
@@ -235,7 +254,8 @@
           value: dateFormat(new Date(), 'YYYY-MM-DD'),
           onConfirm (val) {
             _this.completionDate = val
-            _this.getScheduleList(0)
+            _this.scheduleList = []
+            _this.getScheduleList(1, _this.scheduleType)
           },
           onShow () {
           },
@@ -245,7 +265,7 @@
       }
     },
     mounted () {
-      this.getScheduleList(0)
+      this.getScheduleList(1, 0)
     }
   }
 </script>
@@ -253,6 +273,7 @@
 <style scoped lang="less">
   .schedule-head-date {
     text-align: center;
+    background-color: #35495e;
   }
 
   .schedule-content {
@@ -278,10 +299,6 @@
     overflow: hidden;
     font-size: 12px;
     color: gray;
-  }
-
-  .schedule {
-    background-color: aliceblue;
   }
 
   .schedule-status {

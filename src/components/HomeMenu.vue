@@ -2,12 +2,12 @@
   <div>
     <group>
       <cell title="我的" is-link></cell>
-      <cell title="消息" is-link>
+      <cell title="消息" is-link @click.native="goto('/attention')">
         <div>
-          <badge :text="msgNum"></badge>
+          <badge :text="attentionNum"></badge>
         </div>
       </cell>
-      <cell title="警示" is-link></cell>
+      <cell title="警示" is-link @click.native="goto('/warning')"></cell>
     </group>
     <toast v-model="toast.errorShow" :type="toast.type" :time="800" is-show-mask :text="toast.errorText"
            position="top"></toast>
@@ -29,7 +29,7 @@
     },
     data () {
       return {
-        msgNum: 0,
+        attentionNum: 0,
         toast: {
           errorShow: false,
           errorText: '',
@@ -39,11 +39,14 @@
     },
     methods: {
       getMsgNum () {
-        getRequest(API_PATH.warningCount).then(resp => {
+        getRequest(API_PATH.attentionCount).then(resp => {
           if (resp.status === 200 && resp.data.code === 0) {
-            this.msgNum = resp.data.data
+            this.attentionNum = resp.data.data
           }
         })
+      },
+      goto (url) {
+        this.$router.push(url)
       }
     },
     mounted () {
