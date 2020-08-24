@@ -39,7 +39,7 @@
     },
     methods: {
       getMsgNum () {
-        getRequest(API_PATH.attentionCount).then(resp => {
+        getRequest(API_PATH.attentionCount + '?isRead=false').then(resp => {
           if (resp.status === 200 && resp.data.code === 0) {
             this.attentionNum = resp.data.data
           }
